@@ -12,6 +12,12 @@
             100% { box-shadow: 0 0 10px #00fff0; }
         }
 
+        @keyframes pop {
+            0%   { transform: scale(0.6); opacity: 0; }
+            60%  { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -26,76 +32,75 @@
         .game {
             width: 420px;
             max-width: 100%;
-            box-sizing: border-box;
-            text-align: center;
             padding: 30px 20px;
             border-radius: 20px;
             background: rgba(0, 0, 0, 0.65);
-            box-shadow: 0 0 40px rgba(255, 0, 255, 0.35);
+            text-align: center;
         }
 
         h1 {
-            margin: 0 0 10px;
-            font-size: 26px;
             color: #ff5cff;
             letter-spacing: 2px;
+            margin-bottom: 10px;
         }
 
         .range {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin: 15px 0 20px;
+            margin: 15px 0;
         }
 
         .range input {
-            width: 90px;
+            width: 80px;
             padding: 10px;
+            font-size: 18px;
             border-radius: 10px;
             border: none;
             text-align: center;
-            font-size: 18px;
         }
 
         #result {
             font-size: 72px;
             margin: 20px 0;
             color: #00fff0;
-            text-shadow:
-                0 0 10px #00fff0,
-                0 0 30px #00fff0,
-                0 0 60px #00fff0;
+            text-shadow: 0 0 30px #00fff0;
+        }
+
+        .animate {
+            animation: pop 0.4s ease-out;
         }
 
         button {
             width: 100%;
             max-width: 280px;
-            background: linear-gradient(45deg, #ff00ff, #00fff0);
-            border: none;
-            border-radius: 50px;
+            margin: 10px auto;
             padding: 18px 0;
+            border-radius: 50px;
+            border: none;
             font-size: 20px;
             font-weight: bold;
-            cursor: pointer;
+            background: linear-gradient(45deg, #ff00ff, #00fff0);
             animation: pulse 1.5s infinite;
+            cursor: pointer;
         }
 
-        button:active {
-            transform: scale(0.96);
+        .secondary {
+            background: transparent;
+            color: #aaa;
+            animation: none;
+            font-size: 14px;
         }
 
         #info {
-            margin-top: 15px;
             font-size: 14px;
             color: #ccc;
         }
 
         .history {
             margin-top: 20px;
-            max-height: 120px;
+            max-height: 110px;
             overflow-y: auto;
-            font-size: 14px;
-            color: #aaa;
             border-top: 1px solid rgba(255,255,255,0.1);
             padding-top: 10px;
         }
@@ -107,33 +112,12 @@
             border-radius: 8px;
             background: rgba(0,255,240,0.15);
             color: #00fff0;
-            font-size: 16px;
-        }
-
-        /* 📱 МОБИЛЬНАЯ АДАПТАЦИЯ */
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 22px;
-            }
-
-            #result {
-                font-size: 64px;
-            }
-
-            .range input {
-                width: 80px;
-                font-size: 16px;
-            }
-
-            .history {
-                max-height: 100px;
-            }
         }
     </style>
 </head>
 <body>
 
-<div class="game">
+<div class="game" id="game">
     <h1>DISCO RANDOM</h1>
 
     <div class="range">
@@ -144,66 +128,11 @@
     <div id="result">—</div>
 
     <button onclick="generate()">DROP THE BEAT</button>
+    <button class="secondary" onclick="toggleFullscreen()">⛶ Полный экран</button>
 
     <div id="info"></div>
-
     <div class="history" id="history"></div>
 </div>
 
 <script>
-    function getKey(min, max) {
-        return `used_${min}_${max}`;
-    }
-
-    function generate() {
-        const min = parseInt(document.getElementById('min').value);
-        const max = parseInt(document.getElementById('max').value);
-        const info = document.getElementById('info');
-
-        if (isNaN(min) || isNaN(max) || min >= max) {
-            info.textContent = '⚠️ Некорректный диапазон';
-            return;
-        }
-
-        const key = getKey(min, max);
-        let usedNumbers = JSON.parse(sessionStorage.getItem(key)) || [];
-
-        if (usedNumbers.length >= (max - min + 1)) {
-            info.textContent = '🎉 Все числа уже сыграны';
-            return;
-        }
-
-        let number;
-        do {
-            number = Math.floor(Math.random() * (max - min + 1)) + min;
-        } while (usedNumbers.includes(number));
-
-        usedNumbers.push(number);
-        sessionStorage.setItem(key, JSON.stringify(usedNumbers));
-
-        document.getElementById('result').textContent = number;
-        info.textContent = `Сыграно: ${usedNumbers.length}`;
-
-        renderHistory(usedNumbers);
-    }
-
-    function renderHistory(numbers) {
-        const history = document.getElementById('history');
-        history.innerHTML = '';
-        numbers.forEach(n => {
-            const span = document.createElement('span');
-            span.textContent = n;
-            history.appendChild(span);
-        });
-    }
-
-    window.onload = () => {
-        const min = document.getElementById('min').value;
-        const max = document.getElementById('max').value;
-        const key = getKey(min, max);
-        renderHistory(JSON.parse(sessionStorage.getItem(key)) || []);
-    };
-</script>
-
-</body>
-</html>
+    const audioCtx = new (wind
