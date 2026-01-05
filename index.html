@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Disco Randomizer</title>
+
+    <style>
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 10px #00fff0; }
+            50%  { box-shadow: 0 0 30px #ff00ff; }
+            100% { box-shadow: 0 0 10px #00fff0; }
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #1a002a, #000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .game {
+            width: 420px;
+            text-align: center;
+            padding: 35px 40px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.65);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.35);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            color: #ff5cff;
+            letter-spacing: 2px;
+        }
+
+        .range {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .range input {
+            width: 80px;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #result {
+            font-size: 80px;
+            margin: 20px 0;
+            color: #00fff0;
+            text-shadow:
+                0 0 10px #00fff0,
+                0 0 30px #00fff0,
+                0 0 60px #00fff0;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff00ff, #00fff0);
+            border: none;
+            border-radius: 40px;
+            padding: 14px 36px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .history {
+            margin-top: 25px;
+            max-height: 140px;
+            overflow-y: auto;
+            font-size: 14px;
+            color: #aaa;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+        }
+
+        .history span {
+            display: inline-block;
+            margin: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(0,255,240,0.15);
+            color: #00fff0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game">
+    <h1>DISCO RANDOM</h1>
+
+    <div class="range">
+        <input id="min" type="number" value="1">
+        <input id="max" type="number" value="100">
+    </div>
+
+    <div id="result">—</div>
+
+    <button onclick="generate()">DROP THE BEAT</button>
+
+    <div id="info"></div>
+
+    <div class="history" id="history"></div>
+</div>
+
+<script>
+    function getKey(min, max) {
+        return `used_${min}_${max}`;
+    }
+
+    function generate() {
+        const min = parseInt(document.getElementById('min').value);
+        const max = parseInt(document.getElementById('max').value);
+        const info = document.getElementById('info');
+
+        if (isNaN(min) || isNaN(max) || min >= max) {
+            info.textContent = '⚠️ Некорректный диапазон';
+            return;
+        }
+
+        const key = getKey(min, max);
+        let usedNumbers = JSON.parse(sessionStorage.getItem(key)) || [];
+
+        if (usedNumbers.length >= (max - min + 1)) {
+            info.textContent = '🎉 Все числа уже сыграны';
+            return;
+        }
+
+        let number;
+        do {
+            number = Math.floor(Math.random() * (max - min + 1)) + min;
+        } while (usedNumbers.includes(number));
+
+        usedNumbers.push(number);
+        sessionStorage.setItem(key, JSON.stringify(usedNumbers));
+
+        document.getElementById('result').textContent = number;
+        info.textContent = `Сыграно: ${usedNumbers.length}`;
+
+        renderHistory(usedNumbers);
+    }
+
+    function renderHistory(numbers) {
+        const history = document.getElementById('history');
+        history.innerHTML = '';
+        numbers.forEach(n => {
+            const span = document.createElement('span');
+            span.textContent = n;
+            history.appendChild(span);
+        });
+    }
+
+    // восстановление истории при перезагрузке
+    window.onload = () => {
+        const min = document.getElementById('min').value;
+        const max = document.getElementById('max').value;
+        const key = getKey(min, max);
+        const usedNumbers = JSON.parse(sessionStorage.getItem(key)) || [];
+        renderHistory(usedNumbers);
+    };
+</script>
+
+</body>
+</html>
