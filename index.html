@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Disco Randomizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         @keyframes pulse {
@@ -24,8 +25,10 @@
 
         .game {
             width: 420px;
+            max-width: 100%;
+            box-sizing: border-box;
             text-align: center;
-            padding: 35px 40px;
+            padding: 30px 20px;
             border-radius: 20px;
             background: rgba(0, 0, 0, 0.65);
             box-shadow: 0 0 40px rgba(255, 0, 255, 0.35);
@@ -33,6 +36,7 @@
 
         h1 {
             margin: 0 0 10px;
+            font-size: 26px;
             color: #ff5cff;
             letter-spacing: 2px;
         }
@@ -41,20 +45,20 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin: 20px 0;
+            margin: 15px 0 20px;
         }
 
         .range input {
-            width: 80px;
-            padding: 8px;
-            border-radius: 8px;
+            width: 90px;
+            padding: 10px;
+            border-radius: 10px;
             border: none;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         #result {
-            font-size: 80px;
+            font-size: 72px;
             margin: 20px 0;
             color: #00fff0;
             text-shadow:
@@ -64,18 +68,20 @@
         }
 
         button {
+            width: 100%;
+            max-width: 280px;
             background: linear-gradient(45deg, #ff00ff, #00fff0);
             border: none;
-            border-radius: 40px;
-            padding: 14px 36px;
-            font-size: 18px;
+            border-radius: 50px;
+            padding: 18px 0;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             animation: pulse 1.5s infinite;
         }
 
         button:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
         #info {
@@ -85,8 +91,8 @@
         }
 
         .history {
-            margin-top: 25px;
-            max-height: 140px;
+            margin-top: 20px;
+            max-height: 120px;
             overflow-y: auto;
             font-size: 14px;
             color: #aaa;
@@ -97,10 +103,31 @@
         .history span {
             display: inline-block;
             margin: 4px;
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
             background: rgba(0,255,240,0.15);
             color: #00fff0;
+            font-size: 16px;
+        }
+
+        /* 📱 МОБИЛЬНАЯ АДАПТАЦИЯ */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            #result {
+                font-size: 64px;
+            }
+
+            .range input {
+                width: 80px;
+                font-size: 16px;
+            }
+
+            .history {
+                max-height: 100px;
+            }
         }
     </style>
 </head>
@@ -170,13 +197,11 @@
         });
     }
 
-    // восстановление истории при перезагрузке
     window.onload = () => {
         const min = document.getElementById('min').value;
         const max = document.getElementById('max').value;
         const key = getKey(min, max);
-        const usedNumbers = JSON.parse(sessionStorage.getItem(key)) || [];
-        renderHistory(usedNumbers);
+        renderHistory(JSON.parse(sessionStorage.getItem(key)) || []);
     };
 </script>
 
