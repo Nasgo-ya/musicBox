@@ -135,4 +135,92 @@
 </div>
 
 <script>
-    const audioCtx = new (wind
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 180;
+        gain.gain.value = 0.1;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    function vibrate() {
+        if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function toggleFullscreen() {
+        const el = document.documentElement;
+        if (!document.fullscreenElement) {
+            el.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function getKey(min, max) {
+        return `used_${min}_${max}`;
+    }
+
+    function generate() {
+        const min = +document.getElementById('min').value;
+        const max = +document.getElementById('max').value;
+        const info = document.getElementById('info');
+        const result = document.getElementById('result');
+
+        if (isNaN(min) || isNaN(max) || min >= max) {
+            info.textContent = '⚠️ Некорректный диапазон';
+            return;
+        }
+
+        const key = getKey(min, max);
+        let used = JSON.parse(sessionStorage.getItem(key)) || [];
+
+        if (used.length >= (max - min + 1)) {
+            info.textContent = '🎉 Все числа уже сыграны';
+            return;
+        }
+
+        let number;
+        do {
+            number = Math.floor(Math.random() * (max - min + 1)) + min;
+        } while (used.includes(number));
+
+        used.push(number);
+        sessionStorage.setItem(key, JSON.stringify(used));
+
+        result.textContent = number;
+        result.classList.remove('animate');
+        void result.offsetWidth;
+        result.classList.add('animate');
+
+        playSound();
+        vibrate();
+
+        info.textContent = `Сыграно: ${used.length}`;
+        renderHistory(used);
+    }
+
+    function renderHistory(numbers) {
+        const h = document.getElementById('history');
+        h.innerHTML = '';
+        numbers.forEach(n => {
+            const s = document.createElement('span');
+            s.textContent = n;
+            h.appendChild(s);
+        });
+    }
+
+    window.onload = () => {
+        const min = minInput.value;
+        const max = maxInput.value;
+        renderHistory(JSON.parse(sessionStorage.getItem(getKey(min, max))) || []);
+    };
+</script>
+
+</body>
+</html>
